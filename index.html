@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Personal Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading-screen">
+            <div class="loading-spinner"></div>
+            <p>Loading TaskFlow...</p>
+        </div>
+
+        <!-- Login/Register Page -->
+        <div id="authPage" class="auth-page hidden">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h1>TaskFlow</h1>
+                    <p class="auth-subtitle">Your personalized task management solution</p>
+                </div>
+
+                <!-- Login Form -->
+                <div id="loginForm" class="auth-form">
+                    <h2>Welcome Back</h2>
+                    <form id="loginFormElement">
+                        <div class="form-group">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input type="email" id="loginEmail" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input type="password" id="loginPassword" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--full-width">Sign In</button>
+                    </form>
+                    <div class="auth-switch">
+                        <p>Don't have an account? <a href="#" id="showRegister">Create one</a></p>
+                    </div>
+                    <div class="demo-accounts">
+                        <p class="demo-title">Demo Accounts:</p>
+                        <div class="demo-account-list">
+                            <button class="btn btn--outline btn--sm demo-login" data-email="john@example.com">John Doe</button>
+                            <button class="btn btn--outline btn--sm demo-login" data-email="sarah@example.com">Sarah Wilson</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <div id="registerForm" class="auth-form hidden">
+                    <h2>Create Account</h2>
+                    <form id="registerFormElement">
+                        <div class="form-group">
+                            <label for="registerName" class="form-label">Full Name</label>
+                            <input type="text" id="registerName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail" class="form-label">Email</label>
+                            <input type="email" id="registerEmail" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword" class="form-label">Password</label>
+                            <input type="password" id="registerPassword" class="form-control" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerConfirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" id="registerConfirmPassword" class="form-control" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--full-width">Create Account</button>
+                    </form>
+                    <div class="auth-switch">
+                        <p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="mainApp" class="main-app hidden">
+            <!-- Navigation Header -->
+            <header class="app-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <h1 class="app-title">TaskFlow</h1>
+                        <nav class="main-nav">
+                            <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+                            <button class="nav-btn" data-page="tasks">Tasks</button>
+                            <button class="nav-btn" data-page="analytics">Analytics</button>
+                        </nav>
+                    </div>
+                    <div class="header-right">
+                        <div class="user-menu">
+                            <button class="user-avatar-btn" id="userMenuToggle">
+                                <img id="headerUserAvatar" src="" alt="User Avatar" class="user-avatar">
+                                <span id="headerUserName" class="user-name"></span>
+                            </button>
+                            <div class="user-dropdown hidden" id="userDropdown">
+                                <button class="dropdown-item" id="profileSettingsBtn">Profile Settings</button>
+                                <button class="dropdown-item" id="themeToggle">Toggle Theme</button>
+                                <hr class="dropdown-separator">
+                                <button class="dropdown-item" id="logoutBtn">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Page -->
+            <div id="dashboardPage" class="page-content">
+                <div class="container">
+                    <div class="dashboard-welcome">
+                        <h2 id="welcomeMessage">Welcome back!</h2>
+                        <p id="dashboardSubtitle" class="dashboard-subtitle"></p>
+                    </div>
+
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-content">
+                                <h3 id="totalTasks">0</h3>
+                                <p>Total Tasks</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-content">
+                                <h3 id="completedTasks">0</h3>
+                                <p>Completed</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏰</div>
+                            <div class="stat-content">
+                                <h3 id="pendingTasks">0</h3>
+                                <p>Pending</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔥</div>
+                            <div class="stat-content">
+                                <h3 id="highPriorityTasks">0</h3>
+                                <p>High Priority</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-content">
+                        <div class="recent-tasks-section">
+                            <h3>Recent Tasks</h3>
+                            <div id="recentTasksList" class="task-list"></div>
+                            <button class="btn btn--primary" id="addQuickTaskBtn">+ Add Quick Task</button>
+                        </div>
+                        <div class="progress-chart-section">
+                            <h3>Progress Overview</h3>
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="progressChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Page -->
+            <div id="tasksPage" class="page-content hidden">
+                <div class="container">
+                    <div class="tasks-header">
+                        <h2>Task Management</h2>
+                        <div class="task-controls">
+                            <div class="task-filters">
+                                <select id="categoryFilter" class="form-control">
+                                    <option value="">All Categories</option>
+                                    <option value="work">Work</option>
+                                    <option value="personal">Personal</option>
+                                    <option value="shopping">Shopping</option>
+                                    <option value="health">Health</option>
+                                </select>
+                                <select id="priorityFilter" class="form-control">
+                                    <option value="">All Priorities</option>
+                                    <option value="high">High Priority</option>
+                                    <option value="medium">Medium Priority</option>
+                                    <option value="low">Low Priority</option>
+                                </select>
+                                <select id="statusFilter" class="form-control">
+                                    <option value="">All Tasks</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            <button class="btn btn--primary" id="addTaskBtn">+ Add Task</button>
+                        </div>
+                    </div>
+
+                    <div class="task-search">
+                        <input type="text" id="taskSearch" class="form-control" placeholder="Search tasks...">
+                    </div>
+
+                    <div id="tasksList" class="tasks-container"></div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div id="analyticsPage" class="page-content hidden">
+                <div class="container">
+                    <h2>Analytics & Insights</h2>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3>Task Completion Rate</h3>
+                            <div class="chart-container" style="position: relative; height: 250px;">
+                                <canvas id="completionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Category Distribution</h3>
+                            <div class="chart-container" style="position: relative; height: 250px;">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Priority Breakdown</h3>
+                            <div class="chart-container" style="position: relative; height: 250px;">
+                                <canvas id="priorityChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>Weekly Progress</h3>
+                            <div class="chart-container" style="position: relative; height: 250px;">
+                                <canvas id="weeklyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Settings Page -->
+            <div id="profilePage" class="page-content hidden">
+                <div class="container">
+                    <div class="profile-header">
+                        <h2>Profile Settings</h2>
+                        <button class="btn btn--outline" id="backToDashboard">← Back to Dashboard</button>
+                    </div>
+
+                    <div class="profile-content">
+                        <div class="profile-section">
+                            <h3>Personal Information</h3>
+                            <form id="profileForm">
+                                <div class="profile-avatar-section">
+                                    <img id="profileAvatar" src="" alt="Profile Avatar" class="profile-avatar-large">
+                                    <div class="avatar-controls">
+                                        <input type="url" id="avatarUrl" class="form-control" placeholder="Avatar URL">
+                                        <button type="button" class="btn btn--outline btn--sm" id="updateAvatarBtn">Update Avatar</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profileName" class="form-label">Full Name</label>
+                                    <input type="text" id="profileName" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profileEmail" class="form-label">Email</label>
+                                    <input type="email" id="profileEmail" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profileBio" class="form-label">Bio</label>
+                                    <textarea id="profileBio" class="form-control" rows="3" placeholder="Tell us about yourself..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn--primary">Save Changes</button>
+                            </form>
+                        </div>
+
+                        <div class="profile-section">
+                            <h3>Preferences</h3>
+                            <div class="preference-group">
+                                <label class="preference-label">
+                                    <span>Theme</span>
+                                    <select id="themePreference" class="form-control">
+                                        <option value="light">Light</option>
+                                        <option value="dark">Dark</option>
+                                        <option value="auto">Auto</option>
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="preference-group">
+                                <label class="preference-label">
+                                    <span>Language</span>
+                                    <select id="languagePreference" class="form-control">
+                                        <option value="en">English</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="fr">French</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="profile-section">
+                            <h3>Notifications</h3>
+                            <div class="notification-settings">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="emailNotifications">
+                                    <span class="checkmark"></span>
+                                    Email notifications
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="pushNotifications">
+                                    <span class="checkmark"></span>
+                                    Push notifications
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="reminderNotifications">
+                                    <span class="checkmark"></span>
+                                    Task reminders
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="profile-section">
+                            <h3>Privacy</h3>
+                            <div class="privacy-settings">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="showProfile">
+                                    <span class="checkmark"></span>
+                                    Show profile to others
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="showStats">
+                                    <span class="checkmark"></span>
+                                    Show statistics publicly
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Modal -->
+        <div id="taskModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="taskModalTitle">Add Task</h3>
+                    <button class="modal-close" id="closeTaskModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="taskForm">
+                        <input type="hidden" id="taskId">
+                        <div class="form-group">
+                            <label for="taskTitle" class="form-label">Title</label>
+                            <input type="text" id="taskTitle" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDescription" class="form-label">Description</label>
+                            <textarea id="taskDescription" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="taskCategory" class="form-label">Category</label>
+                                <select id="taskCategory" class="form-control" required>
+                                    <option value="work">Work</option>
+                                    <option value="personal">Personal</option>
+                                    <option value="shopping">Shopping</option>
+                                    <option value="health">Health</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="taskPriority" class="form-label">Priority</label>
+                                <select id="taskPriority" class="form-control" required>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDueDate" class="form-label">Due Date</label>
+                            <input type="datetime-local" id="taskDueDate" class="form-control">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn--outline" id="cancelTask">Cancel</button>
+                            <button type="submit" class="btn btn--primary" id="saveTask">Save Task</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
