@@ -8,16 +8,16 @@ app = Flask(__name__, static_folder='.')
 def home():
     return send_from_directory('.', 'index.html')
 
-# Serve other static files (CSS, JS, images, etc.)
-@app.route('/<path:path>')
-def static_files(path):
-    return send_from_directory('.', path)
-
 # Example analytics route (replace with your real logic later)
 @app.route('/api/analytics')
 def analytics():
     # Dummy response for now
     return {"tasks_completed": [3, 5, 2, 4, 6]}
+
+# Serve other static files (CSS, JS, images, etc.)
+@app.route('/<path:path>')
+def static_files(path):
+    return send_from_directory('.', path)
 
 if __name__ == "__main__":
     # For local testing
